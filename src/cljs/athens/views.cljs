@@ -1,18 +1,21 @@
 (ns athens.views
   (:require
     [athens.db :as db]
-    [athens.devcards.all-pages :refer [table]]
-    [athens.devcards.athena :refer [athena-component]]
-    [athens.devcards.block-page :refer [block-page-component]]
-    [athens.devcards.devtool :refer [devtool-component]]
-    [athens.devcards.left-sidebar :refer [left-sidebar]]
-    [athens.devcards.node-page :refer [node-page-component]]
-    [athens.devcards.right-sidebar :refer [right-sidebar-component]]
-    [athens.devcards.spinner :refer [initial-spinner-component]]
     [athens.subs]
+    [athens.views.all-pages :refer [table]]
+    [athens.views.app-toolbar :refer [app-toolbar]]
+    [athens.views.athena :refer [athena-component]]
+    [athens.views.block-page :refer [block-page-component]]
+    [athens.views.daily-notes :refer [daily-notes-panel db-scroll-daily-notes]]
+    [athens.views.devtool :refer [devtool-component]]
+    [athens.views.filesystem :as filesystem]
+    [athens.views.left-sidebar :refer [left-sidebar]]
+    [athens.views.node-page :refer [node-page-component]]
+    [athens.views.right-sidebar :refer [right-sidebar-component]]
+    [athens.views.spinner :refer [initial-spinner-component]]
     [posh.reagent :refer [pull]]
     [re-frame.core :refer [subscribe dispatch]]
-    [stylefy.core :refer [use-style]]))
+    [stylefy.core :as stylefy :refer [use-style]]))
 
 
 ;;; Styles
@@ -21,21 +24,21 @@
 (def app-wrapper-style
   {:display "grid"
    :grid-template-areas
-   "'left-sidebar main-content secondary-content'
+   "'app-header app-header app-header'
+    'left-sidebar main-content secondary-content'
    'devtool devtool devtool'"
    :grid-template-columns "auto 1fr auto"
-   :grid-template-rows "1fr auto"
+   :grid-template-rows "auto 1fr auto"
    :height "100vh"})
-
-
-(def match-panel-style
-  {:margin "5rem auto"
-   :min-width "500px"
-   :max-width "900px"})
 
 
 (def main-content-style
   {:flex "1 1 100%"
+   :grid-area "main-content"
+   :align-items "flex-start"
+   :justify-content "stretch"
+   :padding-top "2.5rem"
+   :display "flex"
    :overflow-y "auto"})
 
 
@@ -43,12 +46,11 @@
 
 
 (defn alert
-  "When `:errors` subscription is updated, global alert will be called with its contents and then cleared."
   []
-  (let [errors (subscribe [:errors])]
-    (when (seq @errors)
-      (js/alert (str @errors))
-      (dispatch [:clear-errors]))))
+  (let [alert- (subscribe [:alert])]
+    (when-not (nil? @alert-)
+      (js/alert (str @alert-))
+      (dispatch [:alert/unset]))))
 
 
 (defn file-cb
@@ -71,49 +73,57 @@
 (defn pages-panel
   []
   (fn []
-    [:div
-     [:p
-      "Upload your DB " [:a {:href ""} "(tutorial)"]]
-     [:input.input-file {:type      "file"
-                         :name      "file-input"
-                         :on-change (fn [e] (file-cb e))}]
-     [table db/dsdb]]))
+    ;;[:div
+    ;; [:input.input-file {:type      "file"
+    ;;                     :name      "file-input"
+    ;;                     :on-change (fn [e] (file-cb e))}]]
+    [table db/dsdb]))
 
 
 (defn page-panel
   []
-  (let [current-route (subscribe [:current-route])
-        uid           (-> @current-route :path-params :id)
-        node-or-block @(pull db/dsdb '[*] [:block/uid uid])]
-    [:div {:style {:margin-left "40px" :margin-right "40px"}}
-     (if (:node/title node-or-block)
-       [node-page-component (:db/id node-or-block)]
-       [block-page-component (:db/id node-or-block)])]))
+  (let [uid (subscribe [:current-route/uid])
+        {:keys [node/title block/string db/id]} @(pull db/dsdb '[*] [:block/uid @uid])]
+    (cond
+      title [node-page-component id]
+      string [block-page-component id]
+      :else [:h3 "404: This page doesn't exist"])))
 
 
 (defn match-panel
-  [name]
-  [:div (use-style match-panel-style)
-   [(case name
-      :about about-panel
-      :pages pages-panel
-      :page page-panel
-      pages-panel)]])
+  "When app initializes, `route-name` is `nil`. Side effect of this is that a daily page for today is automatically
+  created when app inits. This is expected, but perhaps shouldn't be a side effect here."
+  [route-name]
+  [(case route-name
+     :about about-panel
+     :home daily-notes-panel
+     :pages pages-panel
+     :page page-panel
+     daily-notes-panel)])
 
 
 (defn main-panel
   []
-  (let [current-route (subscribe [:current-route])
-        loading (subscribe [:loading])]
+  (let [route-name (subscribe [:current-route/name])
+        loading    (subscribe [:loading?])
+        modal      (subscribe [:modal])]
     (fn []
       [:<>
        [alert]
        [athena-component]
-       (if @loading
-         [initial-spinner-component]
-         [:div (use-style app-wrapper-style)
-          [left-sidebar]
-          [:div (use-style main-content-style)
-           [match-panel (-> @current-route :data :name)]]
-          [right-sidebar-component]
-          [devtool-component]])])))
+       (cond
+         (and @loading @modal) [athens.views.filesystem/window]
+
+         @loading [initial-spinner-component]
+
+         :else [:<>
+                (when @modal [filesystem/window])
+                [:div (use-style app-wrapper-style)
+                 [app-toolbar]
+                 [left-sidebar]
+                 [:div (use-style main-content-style
+                                  {:on-scroll (when (= @route-name :home)
+                                                #(db-scroll-daily-notes %))})
+                  [match-panel @route-name]]
+                 [right-sidebar-component]
+                 [devtool-component]]])])))

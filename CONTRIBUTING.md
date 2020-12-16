@@ -1,11 +1,18 @@
 # Table of Contents
 
 - [Contributing to Athens](#contributing-to-athens)
+  * [Developers](#developers)
+  * [Designers](#designers)
+  * [Others](#others)
 - [Running Athens Locally](#running-athens-locally)
 - [Deploying Athens and Devcards](#deploying-athens-and-devcards)
   * [Automated Deploys](#automated-deploys)
   * [Manual Deploys](#manual-deploys)
 - [Connecting your REPL](#connecting-your-repl)
+  * [Cursive](#cursive)
+  * [CIDER](#cider)
+  * [Calva](#calva)
+  * [Vim Plugins](#vim-plugins)
 - [Using re-frame-10x](#using-re-frame-10x)
 - [Running CI Scripts Locally](#running-ci-scripts-locally)
   * [Testing](#testing)
@@ -21,10 +28,29 @@
 
 # Contributing to Athens
 
-Whether you are a designer, developer, or have other superpowers, please see our [v1 Project Board](https://github.com/athensresearch/athens/projects/2) to see what we're working on.
+## Developers
 
-- The best place to reach us is our [Discord](https://discord.gg/GCJaV3V)! 👾
+- Join our [Discord](https://discord.gg/GCJaV3V) 👾 and check out the `#engineering` and `#engineers` channels. The former is for anything engineering-related, and the latter is for [contributors](./GOVERNANCE.md#contributors) who have already made non-trivial code contributions.
+  - Post work updates in the `#build-in-public`. This keeps the team on the same page! Let's avoid stepping on each others toes, minimize blockers / dependencies, and cheer each other on!
+- Watch the repo and bookmark our [Project Board](https://github.com/athensresearch/athens/projects/2). This is the ultimate source of truth for product roadmapping.
+- To start working on your PR, you have a few ways to get started:
+    1. ask a question in our `#engineering` [Discord](https://discord.gg/GCJaV3V) channel
+    1. comment on one of the existing top-level issues on the project board
+    1. create a PR draft or issue, then assign yourself (prefer drafts over new issues)
+- In all the cases above, try to scope out what you want to do and how, to the extent that you can at the start of a task! If you aren't sure about the scopes, chat in our Discord. If you feel confident, go ahead and start your PR draft — you don't need permission to start!
 - Read [Product Development at Athens](https://www.notion.so/athensresearch/Product-Development-at-Athens-4c99e37d1713441c99360668c39e5db7) to see our shipping philosophy. It's more nuanced than just "agile", with some inspiration from Basecamp. 🛠
+- If you don't have experience programming with Clojure, checkout our learning resources and join [ClojureFam](https://github.com/athensresearch/ClojureFam) to learn with some friends! In our experience, it takes ~4 weeks of part-time study to begin making solid code contributions to Athens.
+
+## Designers
+
+- Join our [Discord](https://discord.gg/GCJaV3V) 👾 and see what's happening in the `#design` and `#designers` channel. The former is for anything design-related, and the latter is for [contributors](./GOVERNANCE.md#contributors) who have already made non-trivial design contributions.
+- Duplicate the [Athens Design System](https://www.figma.com/file/XITWUHZHNJsIbcCsBkOHpZ/Athens-Design-System?node-id=0%3A1) on Figma to get the building blocks for creating UIs and workflows.
+- See previous concepts in the [Product Design Sandbox](https://www.figma.com/file/iCXP6z7H5IAQ6xyFr5AbZ7/Product-Design-Sandbox?node-id=183%3A37). This Figma is no longer actively used, but seeing previous work can help!
+
+
+## Others
+
+- Have other superpowers?! Join our [Discord](https://discord.gg/GCJaV3V) 👾, introduce yourself in `#introductions`, and ask around in `#agora`!
 
 # Running Athens Locally
 
@@ -32,6 +58,8 @@ These dependencies are needed to get Athens up and running. To install them, fol
 
 1. [Java 11 and Leiningen](https://purelyfunctional.tv/guide/how-to-install-clojure/) (Leiningen installs Clojure)
 1. [Node 12](https://nodejs.org/en/download/) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
+
+*If you want to use Windows Subsystem for Linux (WSL), [try this tutorial](https://www.notion.so/Beginner-Clojure-Environment-Setup-Windows-36f70c16b9a7420da3cd797a3eb712fa#6a53854de58d4f07ba6319d868fba29c).*
 
 After you've got these dependencies, clone the Git repository to your hard drive:
 
@@ -53,7 +81,23 @@ Pull Java dependencies and build, then start a local HTTP server for Athens:
 lein dev
 ```
 
-When these scripts are done, your terminal will read `build complete`. Athens can then be accessed by pointing a browser to http://localhost:3000/ on UNIX or http://127.0.0.1:3000/ on Windows.
+In another terminal, run:
+
+```
+yarn run electron .
+```
+
+Another window should open automatically. That's your Athens!
+
+## Running in Docker
+
+For a quick way to get up and started with a local development environment you can also use [Docker](https://www.docker.com/) via the corresponding [Dockerfile](./Dockerfile).
+In order to do so, build a Docker image and run it like this:
+
+```
+docker build -t athens .
+docker run -it -p 3000:3000 -p 8777:8777 -p 9630:9630 athens
+```
 
 # Deploying Athens and Devcards
 
@@ -88,7 +132,110 @@ Notes:
 
 # Connecting your REPL
 
-- [ ] TODO: write this section for each editor (Cursive, CIDER, Calva, Fireplace, etc.)
+* Make sure you can run Athens locally before proceeding with this section.
+* Refer to shadow-cljs [editor integration docs](https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration) for more details.
+* nREPL port is 8777, as defined in [shadow-cljs.edn](./shadow-cljs.edn).
+
+## Cursive
+
+```
+Editor - IntelliJ IDEA 2020.1.3 (Community Edition) Build #IC-201.8538.31, built on July 7, 2020
+Cursive plugin: 1.9.2 Built on: 2020-07-02
+OS - Windows 10
+```
+
+1. [Install Cursive](https://cursive-ide.com/userguide/index.html)
+1. In a terminal, navigate to the repository root and generate a pom.xml file: `yarn run shadow-cljs pom`.
+1. In Intellij, go to `File → New → Project from Existing Sources...`, then select the generated pom.xml in the project directory.
+1. In a terminal, start a development server: `lein dev`
+1. Once the project has been opened in Intellij IDEA, go to `Run → Edit Configurations...`.
+   - Click `+ → Clojure REPL → Remote`
+   - Name: "REPL for Athens"
+   - Connection type: nREPL
+   - Connection details: Host: localhost, Port: 8777
+![nREPL config](doc/athens-cursive-nrepl-config.PNG)
+1. Go to `Run → Run...` and select the configuration you just created.
+1. Once the clj REPL is started, run `(shadow/repl :app)` to switch to cljs REPL.
+![switch to nrepl](doc/athens-cursive-cljs-nrepl.PNG)
+
+
+## CIDER
+
+```
+Editor - GNU Emacs 26.3 (build 1, x86_64-apple-darwin19.3.0, Carbon Version 162 AppKit 1894.3) of 2020-04-27\
+OS - MacOS Catalina v10.15.5
+```
+
+1. Navigate to any file within your local athens folder.
+1. Run `M-x cider-jack-in-cljs`
+   ![cider-jack-in-cljs](doc/emacs-cider-jack-in.png)
+1. Choose `shadow-cljs`
+   ![choose cljs](doc/emacs-cider-shadow-cljs.png)
+1. You should see something like.
+   ![start repl](doc/emacs-cider-starting-server.png)
+1. Choose `shadow` and then you should be able to choose which `shadow-cljs` build to run.
+   ![shadow cljs profile](doc/emacs-cider-shadow-cljs-profile.png)
+1. You should see a new buffer open within your current Emacs window with a ClojureScript REPL.
+   ![shadow cljs REPL connected](doc/emacs-cider-connected-repl.png)
+
+You now have access to a REPL. If you want to load the file you are editing in it:
+
+1. <kbd>C-c C-k</kbd>, or `cider-load-buffer`
+1. Then, <kbd>C-c M-n n</kbd>, or `cider-repl-set-ns` and you should be able to have the file's namespace in your REPL (e.g. `athens.db>`)
+
+## Calva
+
+```
+Editor - Visual Studio Code
+Calva plugin: v2.0.126 Built on: 2020-07-09
+OS - Windows 10, MacOS Catalina v10.15.6
+```
+
+1. In VS Code, run `ctrl+shift+c` and `ctrl+shift+j` to jack into a repl session.
+2. Pick shadow-cljs.
+3. Select `:main` and `:renderer` profile for shadow-cljs to watch.
+4. Select the `:renderer` build to connect to.
+5. In another terminal tab, run `npx electron .`
+   ![load the namespace](doc/vscode-calva-repl-config.PNG)
+
+## Vim Plugins
+
+- [ ] TODO vim-iced
+- [ ] TODO conjure
+- [X] TODO fireplace
+
+### Fireplace
+
+[Fireplace](https://github.com/tpope/vim-fireplace) is a popular Clojure(script) development plugin for Vim (and Neovim) text editor. It's main dependency is the [cider-nrepl](https://github.com/clojure-emacs/cider-nrepl) which already included as a development dependency.
+
+Assume you already executed the commands described above in different terminal sessions and have the Athens instance running. And of course assume you installed vim-fireplace plugin too.
+
+```
+lein dev # in one terminal, running nrepl server on port 8777
+yarn run electron . # another terminal running the Athens app itself
+```
+
+Now open any Clojure file in Vim. This will load vim-fireplace plugin and necessary commands. First, we need to connect Clojure (not Clojurescript yet) runtime;
+
+```
+:FireplaceConnect 8777
+```
+
+Clojure part is done. Now to connect Clojurescript runtime with vim-fireplace;
+
+```
+:Piggieback :renderer
+```
+
+To test your development environment you can try to evaluate some Clojurescript and see the results on Athens running in electron;
+
+```
+:CljsEval (js/alert "hello!")
+```
+
+You supposed to see an alert on electron app saying "hello!" and your Vim instance would be blocked until you acknowledge the alert message.
+
+If all goes well, now you can see documentation of symbols (binding: K), go to definition (binding: [ C-d) and so fort. See `:help fireplace` for more information.
 
 # Using re-frame-10x
 

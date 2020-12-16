@@ -1,10 +1,9 @@
-(ns athens.devcards.data-browser
+(ns athens.views.data-browser
   (:require
     [athens.db :as db]
-    [athens.style :refer [COLORS HSL-COLORS]]
+    [athens.style :refer [color]]
     [clojure.string :as str]
     [datascript.core :as d]
-    [garden.color :refer [opacify]]
     [reagent.core :as r]
     [stylefy.core :as stylefy :refer [use-style]]))
 
@@ -160,31 +159,31 @@
    :font-size "12px"
    :font-family "IBM Plex Sans Condensed"
    :letter-spacing "-0.01em"
-   :margin "8px 0 0"
+   :margin "0.5rem 0 0"
    :min-width "100%"
-   ::stylefy/manual [[:td {:border-top (str "1px solid " (:panel-color COLORS))
-                           :padding "2px"}]
+   ::stylefy/manual [[:td {:border-top (str "1px solid " (color :border-color))
+                           :padding "0.125rem"}]
                      [:tbody {:vertical-align "top"}]
-                     [:th {:text-align "left" :padding "2px 2px"}]
+                     [:th {:text-align "left" :padding "0.125rem 0.125rem"}]
                      [:tr {:transition "all 0.05s ease"}]
-                     [:td:first-child :th:first-child {:padding-left "8px"}]
-                     [:td:last-child :th-last-child {:padding-right "8px"}]
-                     [:tbody [:tr:hover {:background (opacify (:panel-color HSL-COLORS) 0.15)
-                                         :color (:header-text-color COLORS)}]]
+                     [:td:first-child :th:first-child {:padding-left "0.5rem"}]
+                     [:td:last-child :th-last-child {:padding-right "0.5rem"}]
+                     [:tbody [:tr:hover {:background (color :background-minus-1 :opacity-low)
+                                         :color (color :header-text-color)}]]
                      [:td>ul {:padding "0"
                               :margin "0"
                               :list-style "none"}]
-                     [:td [:li {:margin "0 0 4px"
-                                :padding-top "4px";
-                                :border-top (str "1px solid " (:panel-color COLORS))}]]
+                     [:td [:li {:margin "0 0 0.25rem"
+                                :padding-top "0.25rem";
+                                :border-top (str "1px solid " (color :border-color))}]]
                      [:td [:li:first-child {:border-top "none" :margin-top "0" :padding-top "0"}]]
-                     [:a {:color (:link-color COLORS)}]
+                     [:a {:color (color :link-color)}]
                      [:a:hover {:text-decoration "underline"}]]})
 
 
 (def footer-style
-  {:margin "8px 0"
-   ::stylefy/manual [[:a {:color (:link-color COLORS)}]]})
+  {:margin "0.5rem 0"
+   ::stylefy/manual [[:a {:color (color :link-color)}]]})
 
 
 (defn table-view

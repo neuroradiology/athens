@@ -10,14 +10,14 @@
             :comments "same as Clojure"}
 
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/clojurescript "1.10.597"
+                 [org.clojure/clojurescript "1.10.764"
                   :exclusions [com.google.javascript/closure-compiler-unshaded
                                org.clojure/google-closure-library
                                org.clojure/google-closure-library-third-party]]
-                 [thheller/shadow-cljs "2.8.83"]
-                 [reagent "0.9.1"]
-                 [re-frame "0.11.0"]
-                 [datascript "0.18.10"]
+                 [thheller/shadow-cljs "2.10.22"]
+                 [reagent "0.10.0"]
+                 [re-frame "1.1.0"]
+                 [datascript "1.0.0"]
                  [datascript-transit "0.3.0"]
                  [denistakeda/posh "0.5.8"]
                  [cljs-http "0.1.46"]
@@ -45,7 +45,9 @@
                              :linux   "xdg-open"}}}
 
   :aliases {"dev"          ["with-profile" "dev" "do"
-                            ["run" "-m" "shadow.cljs.devtools.cli" "watch" "app"]]
+                            ["run" "-m" "shadow.cljs.devtools.cli" "watch" "main" "renderer"]]
+            "build"        ["with-profile" "dev" "do"
+                            ["run" "-m" "shadow.cljs.devtools.cli" "compile" "main" "renderer"]]
             "devcards"     ["with-profile" "dev" "do"
                             ["run" "-m" "shadow.cljs.devtools.cli" "watch" "devcards"]]
             "compile"      ["with-profile" "dev" "do"
@@ -66,8 +68,10 @@
   :profiles
   {:dev
    {:dependencies [[binaryage/devtools "1.0.0"]
-                   [day8.re-frame/re-frame-10x "0.5.1"]
-                   [day8.re-frame/tracing "0.5.3"]]
+                   [day8.re-frame/re-frame-10x "0.6.0"]
+                   [day8.re-frame/tracing "0.5.3"]
+                   [cider/cider-nrepl "0.25.1"]]
+
     :source-paths ["dev"]}
    :prod
    {:dependencies [[day8.re-frame/tracing-stubs "0.5.3"]]}}

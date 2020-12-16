@@ -3,14 +3,16 @@
     [athens.coeffects]
     [athens.config :as config]
     [athens.effects]
+    [athens.electron]
     [athens.events]
     [athens.listeners :as listeners]
     [athens.router :as router]
-    [athens.style :refer [app-styles]]
+    [athens.style :as style]
     [athens.subs]
     [athens.views :as views]
+    [goog.dom :refer [getElement]]
     [re-frame.core :as rf]
-    [reagent.core :as reagent]
+    [reagent.dom :as r-dom]
     [stylefy.core :as stylefy]))
 
 
@@ -24,15 +26,18 @@
   []
   (rf/clear-subscription-cache!)
   (router/init-routes!)
-  (reagent/render [views/main-panel]
-                  (.getElementById js/document "app")))
+  (r-dom/render [views/main-panel]
+                (getElement "app")))
 
 
 (defn init
   []
-  (stylefy/tag "body" app-styles)
-  (stylefy/init)
+  (style/init)
+  (stylefy/tag "body" style/app-styles)
   (listeners/init)
-  (rf/dispatch-sync [:boot])
+  (rf/dispatch-sync [:desktop/boot])
+  ;(rf/dispatch-sync [:init-rfdb])
+  ;(rf/dispatch-sync [:loading/unset])
+  ;;(rf/dispatch-sync [:boot])
   (dev-setup)
   (mount-root))
